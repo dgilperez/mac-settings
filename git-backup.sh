@@ -1,8 +1,8 @@
 #!/bin/bash
 
-
 #  Set logging
 LOG_FILE="/tmp/mac-settings-git-backup.log"
+BRANCH_NAME="master"
 
 log() {
     echo "$(date '+%Y-%m-%d %H:%M:%S') - $1" | tee -a "$LOG_FILE"
@@ -34,14 +34,14 @@ if ! git diff --quiet HEAD; then
 fi
 
 # Check if we have any outgoing commits
-OUTGOING=$(git log origin/main..HEAD)
+OUTGOING=$(git log origin/$BRANCH_NAME..HEAD)
 if [ -n "$OUTGOING" ]; then
     log "Outgoing commits detected. Attempting to push..."
-    
+
     # Try to rebase first
-    if git rebase origin/main; then
+    if git rebase origin/$BRANCH_NAME; then
         log "Rebase successful. Pushing changes..."
-        if git push origin main; then
+        if git push origin $BRANCH_NAME; then
             log "Changes pushed successfully"
         else
             log "Error: Failed to push after rebase. Manual intervention may be required."
@@ -50,9 +50,9 @@ if [ -n "$OUTGOING" ]; then
     else
         log "Rebase failed. Attempting merge..."
         git rebase --abort
-        if git merge origin/main; then
+        if git merge origin/$BRANCH_NAME; then
             log "Merge successful. Pushing changes..."
-            if git push origin main; then
+            if git push origin $BRANCH_NAME; then
                 log "Changes pushed successfully"
             else
                 log "Error: Failed to push after merge. Manual intervention may be required."
